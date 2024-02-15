@@ -32,11 +32,12 @@ app.get("/filteredimage", async (req, res) => {
   try {
     const imageUrl = req.query.image_url;
     if (!imageUrl || !validUrl.isUri(imageUrl)) {
-      res.status(400).send("Invalid image_url");
+      res.status(422).send("Invalid image_url");
+    } else {
+      const path = await filterImageFromURL(imageUrl);
+      res.status(200).sendFile(path);
+      res.on("finish", () => deleteLocalFiles([path]));
     }
-    const path = await filterImageFromURL(imageUrl);
-    res.status(200).sendFile(path);
-    res.on("finish", () => deleteLocalFiles([path]));
   } catch (exception) {
     res.status(500).send(exception);
   }
